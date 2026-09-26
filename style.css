@@ -178,8 +178,23 @@ body{
 .key--equals:hover{ background: var(--pink-deeper); }
 .key--equals:active{ transform: scale(0.92); }
 
+/*chibi mascot */
+.chibi{
+  position: absolute;
+  right: -50px;
+  bottom: -24px;
+  width: 108px;
+  height: auto;
+  pointer-events: none;
+  filter: drop-shadow(0 10px 16px var(--shadow-pink));
+  transition: transform 0.15s ease;
+  z-index: 2;
+}
+
+
 /* small screens */
 @media (max-width: 380px){
   .calculator{ padding: 1.1rem 1rem 1.3rem; }
   .key{ padding: 0.8rem 0; font-size: 1.05rem; }
+  .chibi{ width: 68px; right: -10px; bottom: -16px; }
 }

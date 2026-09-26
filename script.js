@@ -1,8 +1,44 @@
-
 (() => {
   const expressionEl = document.getElementById('expression');
   const resultEl = document.getElementById('result');
   const keypad = document.querySelector('.keypad');
+  const chibi = document.getElementById('chibi');
+
+  const CHIBI_SRC = {
+    idle: 'public/chibi3.png',        
+    pressed: 'public/chibi1.png',     
+    calculating: 'public/chibi2.png' 
+  };
+
+  let chibiTimers = [];
+
+  function clearChibiTimers() {
+    chibiTimers.forEach(clearTimeout);
+    chibiTimers = [];
+  }
+
+  function setChibi(state) {
+    if (!chibi) return;
+    chibi.src = CHIBI_SRC[state];
+    void chibi.offsetWidth;
+  }
+
+  function interruptChibi() {
+    clearChibiTimers();
+    setChibi('idle');
+  }
+
+  function playEqualsChibi(runEquals) {
+    clearChibiTimers();
+    setChibi('pressed');
+    chibiTimers.push(setTimeout(() => {
+      setChibi('calculating');
+      chibiTimers.push(setTimeout(() => {
+        runEquals();
+        setChibi('idle');
+      }, 550));
+    }, 450));
+  }
 
   const OPERATORS = ['÷', '×', '−', '+'];
   const SYMBOL_TO_MATH = { '÷': '/', '×': '*', '−': '-', '+': '+' };
@@ -180,6 +216,13 @@
     if (!btn) return;
     flashKey(btn);
 
+    if (btn.dataset.action === 'equals') {
+      playEqualsChibi(equals);
+      return;
+    }
+
+    interruptChibi();
+
     if (btn.dataset.digit !== undefined) {
       inputDigit(btn.dataset.digit);
     } else if (btn.dataset.operator) {
@@ -190,16 +233,14 @@
       negate();
     } else if (btn.dataset.action === 'percent') {
       percent();
-    } else if (btn.dataset.action === 'equals') {
-      equals();
     }
   });
 
   document.querySelector('[data-action="backspace"]').addEventListener('click', () => {
+    interruptChibi();
     backspace();
   });
 
-  //keyboard handle
 
   const KEY_TO_OPERATOR = { '/': '÷', '*': '×', '-': '−', '+': '+' };
 
@@ -207,16 +248,19 @@
     const { key } = e;
 
     if (/^[0-9]$/.test(key)) {
+      interruptChibi();
       inputDigit(key);
       flashKey(document.querySelector(`[data-digit="${key}"]`));
       return;
     }
     if (key === '.') {
+      interruptChibi();
       inputDigit('.');
       flashKey(document.querySelector('[data-digit="."]'));
       return;
     }
     if (KEY_TO_OPERATOR[key]) {
+      interruptChibi();
       const symbol = KEY_TO_OPERATOR[key];
       inputOperator(symbol);
       flashKey(document.querySelector(`[data-operator="${symbol}"]`));
@@ -229,15 +273,18 @@
       return;
     }
     if (key === 'Backspace') {
+      interruptChibi();
       backspace();
       return;
     }
     if (key === 'Escape') {
+      interruptChibi();
       resetAll();
       flashKey(document.querySelector('[data-action="clear"]'));
       return;
     }
     if (key === '%') {
+      interruptChibi();
       percent();
       flashKey(document.querySelector('[data-action="percent"]'));
       return;
